@@ -16,7 +16,30 @@ call add(g:ctrlp_ext_vars, {
   \ })
 
 let s:path = "."
+
+function! s:to_p(str)
+  return fnamemodify(simplify(s:path . "/" . a:str), ":p")
+endfunction
+
+let s:menu = get(g:, 'ctrlp_filer_menu', {
+\ "execute": 'ctrlp#filer#op#execute',
+\ "open":    'ctrlp#filer#op#open',
+\})
+
+function! s:op_menu(path)
+  call ctrlp#exit()
+  redraw
+  let items = sort(filter(keys(s:menu), "len(s:menu[v:val]) > 0"))
+  let r = confirm("Operation for: " . a:path, join(items, "\n"))
+  redraw!
+  if r == 0
+    return
+  endif
+  call function(s:menu[items[r-1]])(a:path)
+endfunction
+
 function! ctrlp#filer#init(...)
+  nnoremap <buffer> <c-d> :call <SID>op_menu(<SID>to_p(ctrlp#getcline()))<cr>
   let s:path = fnamemodify(get(a:000, 0, s:path), ':p')
   call ctrlp#init(ctrlp#filer#id())
   return map([".."] + split(glob(s:path . "/*"), "\n"), 'fnamemodify(v:val, ":t") . (isdirectory(v:val) ? "/" : "")')
@@ -24,7 +47,7 @@ endfunction
 
 function! ctrlp#filer#accept(mode, str)
   call ctrlp#exit()
-  let path = fnamemodify(s:path . "/" . a:str, ":p")
+  let path = s:to_p(a:str)
   if isdirectory(path)
     exe "CtrlPFiler" path
   else
