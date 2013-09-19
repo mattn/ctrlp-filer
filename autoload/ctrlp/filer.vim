@@ -18,7 +18,12 @@ call add(g:ctrlp_ext_vars, {
 let s:path = "."
 
 function! s:to_p(str)
-  return fnamemodify(simplify(s:path . "/" . a:str), ":p")
+  let path = s:path
+  if path !~ '[/\\]$'
+    let path .= '/'
+  endif
+  let path .= a:str
+  return fnamemodify(simplify(path), ":p")
 endfunction
 
 let s:menu = get(g:, 'ctrlp_filer_menu', {
@@ -41,6 +46,7 @@ endfunction
 function! ctrlp#filer#init(...)
   nnoremap <buffer> <c-d> :call <SID>op_menu(<SID>to_p(ctrlp#getcline()))<cr>
   let s:path = fnamemodify(get(a:000, 0, s:path), ':p')
+  silent! exe "lcd" s:path
   call ctrlp#init(ctrlp#filer#id())
   return map([".."] + split(glob(s:path . "/*"), "\n"), 'fnamemodify(v:val, ":t") . (isdirectory(v:val) ? "/" : "")')
 endfunction
@@ -49,7 +55,7 @@ function! ctrlp#filer#accept(mode, str)
   call ctrlp#exit()
   let path = s:to_p(a:str)
   if isdirectory(path)
-    exe "CtrlPFiler" path
+    silent! call feedkeys(":CtrlPFiler " . path . "\n", "nt")
   else
     call ctrlp#acceptfile('', path)
   endif
