@@ -46,7 +46,9 @@ endfunction
 function! ctrlp#filer#init(...)
   nnoremap <buffer> <c-d> :call <SID>op_menu(<SID>to_p(ctrlp#getcline()))<cr>
   let s:path = fnamemodify(get(a:000, 0, s:path), ':p')
-  silent! exe "lcd" s:path
+  if !get(g:, 'ctrlp_filer_disable_lcd', 0)
+    silent! exe "lcd" s:path
+  endif
   call ctrlp#init(ctrlp#filer#id())
   return map([".."] + split(glob(s:path . "/*"), "\n"), 'fnamemodify(v:val, ":t") . (isdirectory(v:val) ? "/" : "")')
 endfunction
