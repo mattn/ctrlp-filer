@@ -1,3 +1,22 @@
+function! ctrlp#filer#op#create(path) abort
+  let newname = input("What's new name: ", a:path)
+  if len(newname) == 0
+    return
+  endif
+  if newname[len(newname)-1] == '/'
+    if has("win32") || has("win64")
+      call system("mkdir " . shellescape(newname))
+    else
+      call system("mkdir -p " . shellescape(newname))
+    endif
+  else
+    if has("win32") || has("win64")
+      call system("copy /y nul " . shellescape(newname))
+    else
+      call system("touch " . shellescape(newname))
+    endif
+  endif
+endfunction
 
 function! ctrlp#filer#op#delete(path) abort
   if confirm("Are you sure?", "Yes\nNo") != 1
