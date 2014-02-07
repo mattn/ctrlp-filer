@@ -45,6 +45,7 @@ endfunction
 
 function! ctrlp#filer#init(...)
   nnoremap <buffer> <c-d> :call <SID>op_menu(<SID>to_p(ctrlp#getcline()))<cr>
+  nnoremap <buffer> <c-y> :call <SID>op_menu(<SID>to_p(""))<cr>
   let s:path = fnamemodify(get(a:000, 0, s:path), ':p')
   if !get(g:, 'ctrlp_filer_disable_lcd', 0)
     silent! exe "lcd" s:path
